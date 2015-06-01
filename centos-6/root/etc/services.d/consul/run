@@ -1,0 +1,9 @@
+#!/usr/bin/with-contenv sh
+
+USER=consul
+BIN=/usr/sbin/consul
+CONFIG=/etc/consul
+DOMAINNAME=`dnsdomainname`
+JOIN_IP=`getent hosts consul.$DOMAINNAME | awk '{print $1}'`
+
+exec s6-setuidgid $USER $BIN agent -config-dir $CONFIG -join $JOIN_IP;

@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+[[ -f ./configure ]] && source configure
+
+CONFIG=/etc/logstash-forwarder.conf
+BIN=/opt/logstash-forwarder/bin/logstash-forwarder
+
+exec $BIN -config $CONFIG;

@@ -1,0 +1,8 @@
+
+[fedora-epel]
+name=Extra Packages for Enterprise Linux 6 - $basearch
+mirrorlist=http://io.dev/?release=$releasever&arch=$basearch&repo=epel
+enabled=1
+gpgcheck=1
+gpgkey=http://mirrors.mudbox.dev/fedora-epel/RPM-GPG-KEY-EPEL-$releasever
+sslverify=true

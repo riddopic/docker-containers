@@ -1,0 +1,3 @@
+#!/bin/sh
+
+exec apt-get install -y --no-install-recommends $@

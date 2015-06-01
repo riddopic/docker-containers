@@ -1,0 +1,5 @@
+#!/usr/bin/with-contenv sh
+
+[[ -f ./configure ]] && ./configure
+
+exec nginx;

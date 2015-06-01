@@ -1,0 +1,3 @@
+#!/usr/bin/with-contenv sh
+
+exec /go/src/github.com/tobegit3hub/seagull/seagull

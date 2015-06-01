@@ -1,0 +1,22 @@
+{
+  "bootstrap_expect": 1,
+  "server": true,
+  "data_dir": "/data",
+  "ui_dir": "/ui",
+  "datacenter": "fr1",
+  "leave_on_terminate": true,
+  "client_addr": "0.0.0.0",
+  "recursor": "8.8.8.8",
+  "disable_update_check": true,
+  "service": {
+    "name": "consul",
+    "tags": ["consul", "discovery"],
+    "port": 8500,
+    "checks": [
+      {
+        "script": "curl --silent --show-error --fail --dump-header /dev/stderr --retry 2 http://127.0.0.1:8500 > /dev/null",
+        "interval": "5s"
+      }
+    ]
+  }
+}

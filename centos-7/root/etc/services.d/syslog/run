@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+[[ -f ./configure ]] && source configure
+
+exec rsyslogd -f /etc/rsyslog.conf -n

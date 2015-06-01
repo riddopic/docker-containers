@@ -1,0 +1,8 @@
+
+[updates]
+name=CentOS-$releasever - Updates
+mirrorlist=http://io.dev/?release=$releasever&arch=$basearch&repo=centos-updates
+enabled=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-$releasever
+sslverify=true

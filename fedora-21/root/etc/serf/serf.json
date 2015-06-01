@@ -1,0 +1,14 @@
+{
+  "tags": {
+    "role": "consul",
+    "datacenter": "fr1"
+  },
+  "leave_on_terminate": true,
+  "event_handlers": [
+    "user=/etc/serf/handlers/user-and-query-router.sh",
+    "query=/etc/serf/handlers/user-and-query-router.sh"
+  ],
+  "start_join": [
+    "192.168.3.1:7946"
+  ]
+}

@@ -1,0 +1,7 @@
+#!/usr/bin/with-contenv sh
+
+USER=serf
+CONFIG=/etc/serf
+BIN=/usr/sbin/serf
+
+exec s6-setuidgid $USER $BIN agent -config-dir $CONFIG;
