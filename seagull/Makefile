@@ -19,7 +19,7 @@
 
 .PHONY: build push shell run start stop rm release clean
 
-REPO     ?= acme
+REPO     ?= riddopic
 NAME     ?= seagull
 VERSION  ?= 1.3.0
 INSTANCE ?= PurpleFrog

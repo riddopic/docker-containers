@@ -19,12 +19,12 @@
 
 .PHONY: build push shell run start stop rm release clean
 
-REPO      ?= acme
+REPO      ?= riddopic
 NAME      ?= chef-server
 VERSION   ?= 12.3
 INSTANCE  ?= AgedWood
 PORTS     ?= -p 80 -p 443
-ENV       ?= -e "PUBLIC_URL=chef.acme.deriddopic
+ENV       ?= -e "PUBLIC_URL=chef.mudbox.dev
 					   -e "OC_ID_ADMINISTRATORS=jenkins"
 CONTAINER ?= $(REPO)/$(NAME):$(VERSION)
 OPTIONS   ?= $(PORTS) $(ENV)

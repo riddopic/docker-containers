@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 
-FROM       acme/ubuntu-14.04
+FROM       riddopic/ubuntu-14.04
 MAINTAINER Stefano Harding <riddopic@gmail.com>
 
 ENV LANG=C.UTF-8 JAVA_VERSION=8u45 JAVA_DEBIAN_VERSION=8u45-b14-2~bpo8+2 \

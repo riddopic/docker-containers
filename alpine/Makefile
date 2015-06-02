@@ -19,7 +19,7 @@
 
 .PHONY: build push shell run start stop rm release clean
 
-REPO     ?= acme
+REPO     ?= riddopic
 NAME     ?= alpine
 VERSION  ?= 3.1
 INSTANCE ?= YoungWave

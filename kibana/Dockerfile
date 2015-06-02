@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 
-FROM       acme/nginx
+FROM       riddopic/nginx
 MAINTAINER Stefano Harding <riddopic@gmail.com>
 
 EXPOSE 5601

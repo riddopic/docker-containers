@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 
-FROM       acme/alpine
+FROM       riddopic/alpine
 MAINTAINER Stefano Harding <riddopic@gmail.com>
 
 EXPOSE 80

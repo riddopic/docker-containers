@@ -19,7 +19,7 @@
 
 .PHONY: build push shell run start stop rm release clean
 
-REPO     ?= acme
+REPO     ?= riddopic
 NAME     ?= ubuntu-14.04
 VERSION  ?= 14.04
 INSTANCE ?= EmptyWind

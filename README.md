@@ -41,7 +41,7 @@ Consul or all other requests to the original name servers (8.8.8.8, 8.8.4.4).
 
 The consul Web gui runs on the default port of 8500.
 
-	    * http://consul.acme.dev:8500
+	    * http://consul.mudbox.dev:8500
 
 #### Docker
 
@@ -54,7 +54,7 @@ provision containers locally.
 [Seagull][] provides a friendly Web UI to monitor docker and get a visual
 representation of your running infrastructure.
 
-		* http://seagull.acme.dev
+		* http://seagull.mudbox.dev
 
 ## Quick Start Guide
 
@@ -475,7 +475,7 @@ anything used to build the infrastructure is captured and automated.
 #### Environment Variables
 
  - `PUBLIC_URL` - should be configured to a full public URL of the
-   endpoint (e.g. `https://chef.acme.dev`)
+   endpoint (e.g. `https://chef.mudbox.dev`)
  - `OC_ID_ADMINISTRATORS` - if set, it should be a comma-separated list of
    users that will be allowed to add oc_id applications (the Supermarket
    for example).
@@ -486,12 +486,12 @@ anything used to build the infrastructure is captured and automated.
 
 #### Usage
 
-To start the container `chef` with the hostname set to `chef.acme.dev`, using
-the acme/chef-server base container:
+To start the container `chef` with the hostname set to `chef.mudbox.dev`, using
+the riddopic/chef-server base container:
 
-	$ docker run -d --name chef -h chef.acme.dev \
-		-e 'PUBLIC_URL=https://chef.acme.dev OC_ID_ADMINISTRATORS=jenkins' \
-			acme/chef-server
+	$ docker run -d --name chef -h chef.mudbox.dev \
+		-e 'PUBLIC_URL=https://chef.mudbox.dev OC_ID_ADMINISTRATORS=jenkins' \
+			riddopic/chef-server
 
 #### Prerequisites and first start
 
@@ -534,10 +534,10 @@ Use `docker exec` to run commands on your Chef server:
 	      Name:       [chef-server]
 	      Version:    [12.3]
 
-      docker build -t acme/chef-server:12.3 .
+      docker build -t riddopic/chef-server:12.3 .
     	Sending build context to Docker daemon 32.26 kB
     	Sending build context to Docker daemon
-    	Step 0 : FROM acme/ubuntu-14.04
+    	Step 0 : FROM riddopic/ubuntu-14.04
     	 ---> fdf1de186398
     	Step 1 : MAINTAINER Stefano Harding <riddopic@gmail.com>
     	 ---> Using cache
@@ -622,17 +622,17 @@ examples.
 
 #### ElasticSearch
 
-	$ docker run -d --name elasticsearch -h elasticsearch.acme.dev \
-		acme/elasticsearch
+	$ docker run -d --name elasticsearch -h elasticsearch.mudbox.dev \
+		riddopic/elasticsearch
 
 #### LogStash
 
-    $ docker run -d --name logstash -h logstash.acme.dev acme/logstash \
+    $ docker run -d --name logstash -h logstash.mudbox.dev riddopic/logstash \
     	-f /conf/syslog.conf
 
 #### Kibana
 
-     $ docker run -d --name kibana -h logstash.acme.dev acme/kibana
+     $ docker run -d --name kibana -h logstash.mudbox.dev riddopic/kibana
 
 Once this container is running, Kibana configuration from the file es-
 kibana.json was imported into the ElasticSearch database. Now we can take a look

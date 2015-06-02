@@ -19,7 +19,7 @@
 
 .PHONY: build push shell run start stop rm release clean
 
-REPO     ?= acme
+REPO     ?= riddopic
 NAME     ?= kibana
 VERSION  ?= 4.0.2
 INSTANCE ?= CoolLeaf

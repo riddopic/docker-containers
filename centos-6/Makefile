@@ -19,7 +19,7 @@
 
 .PHONY: build push shell run start stop rm release clean
 
-REPO     ?= acme
+REPO     ?= riddopic
 NAME     ?= centos-6
 VERSION  ?= 6.6
 INSTANCE ?= SparklingSky

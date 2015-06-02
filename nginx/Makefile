@@ -19,7 +19,7 @@
 
 .PHONY: build push shell run start stop rm release clean
 
-REPO     ?= acme
+REPO     ?= riddopic
 NAME     ?= nginx
 VERSION  ?= 0.0.7
 INSTANCE ?= CoolLeaf
