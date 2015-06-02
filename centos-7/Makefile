@@ -19,7 +19,7 @@
 
 .PHONY: build push shell run start stop rm release clean
 
-REPO     ?= riddopic
+REPO     ?= acme
 NAME     ?= centos-7
 VERSION  ?= 7.1
 INSTANCE ?= DawnCloud

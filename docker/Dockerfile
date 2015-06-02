@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 
-FROM       riddopic/ubuntu-14.04
+FROM       acme/ubuntu-14.04
 MAINTAINER Stefano Harding <riddopic@gmail.com>
 
 ENV INITRD=no GOMAXPROCS=2 DEBIAN_FRONTEND=noninteractive

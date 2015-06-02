@@ -19,7 +19,7 @@
 
 .PHONY: build push shell run start stop rm release clean
 
-REPO     ?= riddopic
+REPO     ?= acme
 NAME     ?= elasticsearch
 VERSION  ?= 1.5.2
 INSTANCE ?= EmptyWind

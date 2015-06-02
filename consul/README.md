@@ -4,7 +4,7 @@
 	"data_dir": "/opt/consul/data",
 	"ui_dir": "/opt/consul/ui",
   "datacenter": "Paris",
-  "domain": "riddopic.dev",
+  "domain": "acme.dev",
   "leave_on_terminate": true,
 	"client_addr": "0.0.0.0",
 	"ports": {
@@ -32,7 +32,7 @@ becoming a working cluster.
 Then we'll start `node2` and tell it to join `node1` using `$JOIN_IP`:
 
     $BIN agent -config-dir $CONFIG --server -join 172.17.0.244
-    docker run -d --name consul02 -h consul02.mudbox.dev riddopic/consul
+    docker run -d --name consul02 -h consul02.mudbox.dev acme/consul
 
 Now we can start `node3` the same way:
 
@@ -47,9 +47,9 @@ to interact with the cluster. It also means it doesn't need disk persistence.
 
 
 
-    docker run -it --name consul01 -h consul01.mudbox.dev riddopic/consul-bootstraper
-    docker run -it --name consul02 -h consul02.mudbox.dev riddopic/consul
-    docker run -it --name consul03 -h consul03.mudbox.dev riddopic/consul
+    docker run -it --name consul01 -h consul01.mudbox.dev acme/consul-bootstraper
+    docker run -it --name consul02 -h consul02.mudbox.dev acme/consul
+    docker run -it --name consul03 -h consul03.mudbox.dev acme/consul
 
 
 # https://github.com/just-containers/s6-overlay/releases/
@@ -80,7 +80,7 @@ dig @172.17.1.16 -p 53 consul.node.consul
 }
 
 
-docker run -d -p 22 -p 8300:8300 -p 8301:8301 -p 8301:8301/udp -p 8302:8302 -p 8302:8302/udp -p 8400:8400 -p 8500:8500 --name consul -h consul.mudbox.dev riddopic/consul
+docker run -d -p 22 -p 8300:8300 -p 8301:8301 -p 8301:8301/udp -p 8302:8302 -p 8302:8302/udp -p 8400:8400 -p 8500:8500 --name consul -h consul.mudbox.dev acme/consul
 
 
 /bin/sh

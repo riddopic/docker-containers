@@ -17,11 +17,11 @@
 # limitations under the License.
 #
 
-FROM       riddopic/ubuntu-14.04
+FROM       acme/ubuntu-14.04
 MAINTAINER Stefano Harding <riddopic@gmail.com>
 
-ENV JRE_VERSION=8u31 JRE_CHECKSUM=4d6a99aa7f2addde8f6ad714e788ff61 JAVA_HOME=/usr/java/latest ELASTICSEARCH_VERSION=1.5.2 PATH=/usr/share/elasticsearch/bin:$PATH
-ENV LANG C.UTF-8 JAVA_VERSION 8u45 JAVA_DEBIAN_VERSION 8u45-b14-2~bpo8+2 CA_CERTIFICATES_JAVA_VERSION 20140324 ELASTICSEARCH_VERSION 1.5.2
+ENV LANG=C.UTF-8 JAVA_VERSION=8u45 JAVA_DEBIAN_VERSION=8u45-b14-2~bpo8+2 \
+    CA_CERTIFICATES_JAVA_VERSION=20140324 ELASTICSEARCH_VERSION=1.5.2
 EXPOSE 9200 9300
 RUN apt-get-min update && \
     apt-get-install-min ca-certificates curl wget unzip && \

@@ -19,7 +19,7 @@
 
 .PHONY: build push shell run start stop rm release clean
 
-REPO     ?= riddopic
+REPO     ?= acme
 NAME     ?= consul
 VERSION  ?= 0.5.1
 INSTANCE ?= FallingDust

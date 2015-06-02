@@ -19,7 +19,7 @@
 
 .PHONY: build push shell run start stop rm release clean
 
-REPO     ?= riddopic
+REPO     ?= acme
 NAME     ?= fedora-21
 VERSION  ?= 21
 INSTANCE ?= AncientPaper

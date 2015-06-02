@@ -530,14 +530,14 @@ Use `docker exec` to run commands on your Chef server:
     $ cd docker-containers/chef-server && make build
 
       Building chef-server container from Dockerfile:
-        Repository: [riddopic]
+        Repository:   [acme]
 	      Name:       [chef-server]
 	      Version:    [12.3]
 
-      docker build -t riddopic/chef-server:12.3 .
+      docker build -t acme/chef-server:12.3 .
     	Sending build context to Docker daemon 32.26 kB
     	Sending build context to Docker daemon
-    	Step 0 : FROM riddopic/ubuntu-14.04
+    	Step 0 : FROM acme/ubuntu-14.04
     	 ---> fdf1de186398
     	Step 1 : MAINTAINER Stefano Harding <riddopic@gmail.com>
     	 ---> Using cache
@@ -623,16 +623,16 @@ examples.
 #### ElasticSearch
 
 	$ docker run -d --name elasticsearch -h elasticsearch.acme.dev \
-		riddopic/elasticsearch
+		acme/elasticsearch
 
 #### LogStash
 
-    $ docker run -d --name logstash -h logstash.acme.dev riddopic/logstash \
+    $ docker run -d --name logstash -h logstash.acme.dev acme/logstash \
     	-f /conf/syslog.conf
 
 #### Kibana
 
-     $ docker run -d --name kibana -h logstash.acme.dev riddopic/kibana
+     $ docker run -d --name kibana -h logstash.acme.dev acme/kibana
 
 Once this container is running, Kibana configuration from the file es-
 kibana.json was imported into the ElasticSearch database. Now we can take a look
