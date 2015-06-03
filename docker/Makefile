@@ -19,7 +19,7 @@
 
 .PHONY: build push shell run start stop rm release clean
 
-REPO     ?= acme
+REPO     ?= riddopic
 NAME     ?= docker
 VERSION  ?= 1.6
 INSTANCE ?= LivelySmoke
