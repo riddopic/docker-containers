@@ -4,8 +4,8 @@
     "tags": ["dns", "dnsmasq"],
     "port":   53,
     "checks": [{
-      "script":  "/usr/bin/check_dns.sh",
-      "interval": "5s"
+      "script":  "/usr/bin/check_dns.sh ping.dev 10.254.254.253",
+      "interval": "15s"
     }]
   }
 }

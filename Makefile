@@ -21,8 +21,8 @@
 
 default: all
 
-all: alpine centos chef-server consul docker elasticsearch fedora kibana \
-	   logstash nginx seagull ubuntu
+all: alpine centos chef-server consul docker  fedora kibana \
+	    nginx seagull ubuntu
 
 alpine:
 	$(MAKE) -C alpine build tag
