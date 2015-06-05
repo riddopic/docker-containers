@@ -22,7 +22,7 @@
 default: all
 
 all: alpine centos chef-server consul docker  fedora kibana \
-	    nginx seagull ubuntu
+	    nginx seagull squid ubuntu
 
 alpine:
 	$(MAKE) -C alpine build tag
@@ -58,12 +58,15 @@ nginx: alpine
 seagull: alpine
 	$(MAKE) -C seagull build tag
 
+squid: alpine
+	$(MAKE) -C squid build tag
+
 ubuntu:
 	$(MAKE) -C ubuntu-14.04 build tag
 
 clean: clean-alpine clean-centos clean-chef-server clean-consul clean-docker \
 			 clean-elasticsearch clean-fedora clean-kibana clean-logstash \
-			 clean-nginx clean-seagull clean-ubuntu
+			 clean-nginx clean-seagull clean-squid clean-ubuntu
 
 clean-alpine:
 	$(MAKE) -C alpine clean
@@ -98,6 +101,9 @@ clean-nginx:
 
 clean-seagull:
 	$(MAKE) -C seagull clean
+
+clean-squid:
+	$(MAKE) -C squid clean
 
 clean-ubuntu:
 	$(MAKE) -C ubuntu-14.04 clean

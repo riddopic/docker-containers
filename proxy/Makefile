@@ -20,8 +20,8 @@
 .PHONY: build push shell run start stop rm release clean
 
 REPO     ?= riddopic
-NAME     ?= alpine
-VERSION  ?= 3.2
+NAME     ?= proxy
+VERSION  ?= 3.5.4
 INSTANCE ?= YoungWave
 PORTS    ?=
 ENV      ?=

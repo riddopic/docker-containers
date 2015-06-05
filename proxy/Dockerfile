@@ -17,13 +17,9 @@
 # limitations under the License.
 #
 
-FROM       riddopic/ubuntu-14.04
+FROM       alpine:3.2
 MAINTAINER Stefano Harding <riddopic@gmail.com>
 
-ENV INITRD=no GOMAXPROCS=2 DEBIAN_FRONTEND=noninteractive PORT=4444
 ADD root /
-RUN apt-get-min update;\
-    apt-get-install-min apt-transport-https ca-certificates curl lxc iptables ;\
-    curl -sSL https://get.docker.com/ubuntu/ | sh;\
-    apt-get-min clean;\
-    rm -rf /tmp/* /var/tmp/* /var/lib/apt/lists/* /var/cache/apt/archives/*
+RUN apk add --update iptables python && rm -rf /var/cache/apk/*
+CMD /iptables.py
