@@ -1,109 +1,56 @@
-# encoding: UTF-8
-#
-# Author:    Stefano Harding <riddopic@gmail.com>
-# License:   Apache License, Version 2.0
-# Copyright: (C) 2014-2015 Stefano Harding
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
 
-.PHONY: all alpine default centos-6 centos-7 ubuntu
+include includes.mk
 
-default: all
 
-all: alpine centos chef-server consul docker  fedora kibana \
-	    nginx seagull squid ubuntu
+CONTAINER = squid router alpine centos-6 centos-7 fedora-21 ubuntu-14.04 \
+						nginx chef-server consul docker dockerui elasticsearch kibana \
+						logstash seagull
 
-alpine:
-	$(MAKE) -C alpine build tag
+START_ORDER = squid router
 
-centos:
-	$(MAKE) -C centos-6 build tag
-	$(MAKE) -C centos-7 build tag
+all: init build
 
-chef-server: ubuntu
-	$(MAKE) -C chef-server build tag
+dev-registry: check-docker
+	@docker inspect registry >/dev/null 2>&1 && docker start registry || docker run --restart="always" -d -p 5000:5000 --name registry registry:0.9.1
+	@echo
+	@echo "To use the local registry for development:"
+	@echo "    export DEV_REGISTRY=`docker-machine ip ip 2>/dev/null`:5000"
 
-consul: alpine
-	$(MAKE) -C consul build tag
+init: check-docker
+	@$(foreach C, $(START_ORDER), $(MAKE) -C $(C) build &&) echo done
+	@$(foreach C, $(START_ORDER), $(MAKE) -C $(C) run &&) echo done
 
-docker: ubuntu
-	$(MAKE) -C docker build tag
+build: check-docker
+	@$(foreach C, $(CONTAINER), $(MAKE) -C $(C) build &&) echo done
 
-elasticsearch: ubuntu
-	$(MAKE) -C elasticsearch build tag
+clean:
+	@$(foreach C, $(CONTAINER), $(MAKE) -C $(C) clean &&) echo done
 
-fedora:
-	$(MAKE) -C fedora-21 build tag
+full-clean:
+	@$(foreach C, $(CONTAINER), $(MAKE) -C $(C) full-clean &&) echo done
 
-kibana: alpine nginx
-	$(MAKE) -C kibana build tag
+start:
+	@$(foreach C, $(START_ORDER), $(MAKE) -C $(C) start &&) echo done
 
-logstash: ubuntu
-	$(MAKE) -C logstash build tag
+stop:
+	@$(foreach C, $(CONTAINER), $(MAKE) -C $(C) stop &&) echo done
 
-nginx: alpine
-	$(MAKE) -C nginx build tag
+restart: stop start
 
-seagull: alpine
-	$(MAKE) -C seagull build tag
+run: start
 
-squid: alpine
-	$(MAKE) -C squid build tag
+dev-release:
+	@$(foreach C, $(CONTAINER), $(MAKE) -C $(C) dev-release &&) echo done
 
-ubuntu:
-	$(MAKE) -C ubuntu-14.04 build tag
+push:
+	@$(foreach C, $(CONTAINER), $(MAKE) -C $(C) push &&) echo done
 
-clean: clean-alpine clean-centos clean-chef-server clean-consul clean-docker \
-			 clean-elasticsearch clean-fedora clean-kibana clean-logstash \
-			 clean-nginx clean-seagull clean-squid clean-ubuntu
+set-image:
+	@$(foreach C, $(CONTAINER), $(MAKE) -C $(C) set-image &&) echo done
 
-clean-alpine:
-	$(MAKE) -C alpine clean
+release: check-registry
+	@$(foreach C, $(CONTAINER), $(MAKE) -C $(C) release &&) echo done
 
-clean-centos:
-	$(MAKE) -C centos-6 clean
-	$(MAKE) -C centos-7 clean
+deploy: build dev-release restart
 
-clean-chef-server:
-	$(MAKE) -C chef-server clean
-
-clean-consul:
-	$(MAKE) -C consul clean
-
-clean-docker:
-	$(MAKE) -C docker clean
-
-clean-elasticsearch:
-	$(MAKE) -C elasticsearch clean
-
-clean-fedora:
-	$(MAKE) -C fedora-21 clean
-
-clean-kibana:
-	$(MAKE) -C kibana clean
-
-clean-logstash:
-	$(MAKE) -C logstash clean
-
-clean-nginx:
-	$(MAKE) -C nginx clean
-
-clean-seagull:
-	$(MAKE) -C seagull clean
-
-clean-squid:
-	$(MAKE) -C squid clean
-
-clean-ubuntu:
-	$(MAKE) -C ubuntu-14.04 clean
+test:

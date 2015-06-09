@@ -20,6 +20,15 @@
 FROM       alpine:3.2
 MAINTAINER Stefano Harding <riddopic@gmail.com>
 
+ENV GOMAXPROCS=8 GOPATH=/go
+EXPOSE 80
 ADD root /
-RUN apk add --update iptables python && rm -rf /var/cache/apk/*
-CMD /iptables.py
+
+RUN apk add --update go git gcc musl-dev curl;\
+    go get github.com/crosbymichael/dockerui;\
+    cd /go/src/github.com/crosbymichael/dockerui/;\
+    go build dockerui.go;\
+    apk del go git gcc musl-dev;\
+    rm -rf /var/cache/apk/*
+
+CMD '/go/src/github.com/crosbymichael/dockerui'

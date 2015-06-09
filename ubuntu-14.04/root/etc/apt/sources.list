@@ -1,4 +1,4 @@
 
 deb http://mirrors.dev/ubuntu/public trusty main
-deb http://mirrors.dev/ubuntu/public trusty-updates main
+deb http://mirrors.dev/ubuntu/public trusty-updates  main
 deb http://mirrors.dev/ubuntu/public trusty-security main

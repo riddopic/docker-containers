@@ -22,7 +22,7 @@
 
 include ../includes.mk
 
-CONTAINER = fedora-21
+CONTAINER = dockerui
 IMAGE = $(IMAGE_PREFIX)$(CONTAINER):$(BUILD_TAG)
 DEV_IMAGE = $(DEV_REGISTRY)/$(IMAGE)
 
@@ -37,7 +37,7 @@ full-clean: check-docker check-registry
 	docker images -q $(IMAGE_PREFIX)$(CONTAINER) | xargs docker rmi -f
 
 start:
-	docker run -d --name $(CONTAINER) $(IMAGE)
+	@docker inspect $(CONTAINER) >/dev/null 2>&1 && docker start $(CONTAINER) || docker run -d --name=$(CONTAINER) -p 80:9000 --privileged -v /var/run/docker.sock:/var/run/docker.sock $(IMAGE)
 
 stop:
 	docker stop $(CONTAINER)

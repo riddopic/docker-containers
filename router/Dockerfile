@@ -22,6 +22,6 @@ MAINTAINER Stefano Harding <riddopic@gmail.com>
 
 ADD root /
 
-RUN apk add --update squid python && rm -rf /var/cache/apk/*
+RUN apk add --update iptables python && rm -rf /var/cache/apk/*
 
-CMD /squid.py
+CMD /iptables.py
