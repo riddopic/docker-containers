@@ -14,8 +14,8 @@
     "port": 8500,
     "checks": [
       {
-        "script": "curl --silent --show-error --fail --dump-header /dev/stderr --retry 2 http://127.0.0.1:8500 > /dev/null",
-        "interval": "5s"
+        "script": "curl --silent --show-error --fail --dump-header /dev/stderr --retry 2 http://ping.dev > /dev/null",
+        "interval": "15s"
       }
     ]
   }

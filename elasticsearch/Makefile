@@ -17,67 +17,44 @@
 # limitations under the License.
 #
 
-.PHONY: build push shell run start stop rm release clean
+.PHONY: build clean full-clean start stop restart run dev-release push \
+				release deploy test
 
-REPO     ?= riddopic
-NAME     ?= elasticsearch
-VERSION  ?= 1.5.2
-INSTANCE ?= EmptyWind
-PORTS    ?=
-ENV      ?=
+include ../includes.mk
 
-help:
-	@echo "\n\033[0;35mContainer management for:\033[0m\n" \
-	      "Repository: [\033[0;33m$(REPO)\033[0m]\n" \
-	      "Name:       [\033[0;33m$(NAME)\033[0m]\n" \
-	      "Version:    [\033[0;33m$(VERSION)\033[0m]\n"
-	@echo "\033[0;35mUsage:\033[0m \n\n\
-  make build     Build a new [$red$(NAME)$normal] image from a Dockerfile. \n\
-  make tag       Tag an image into a repository. \n\
-  make push      Push image to the registry. \n\
-  make shell   	 Run container in the foreground with an interactive shell. \n\
-  make run       Run the container and attach the console (foreground). \n\
-  make start     Start the container in the background (detached). \n\
-  make stop      Gracefully stop a running container. \n\
-  make rm        Remove the container. \n\
-  make release   Create tag, build and push an image to the registry. \n\
-  make clean     Remove untagged images. \n\
-"
+CONTAINER = elasticsearch
+IMAGE = $(IMAGE_PREFIX)$(CONTAINER):$(BUILD_TAG)
+DEV_IMAGE = $(DEV_REGISTRY)/$(IMAGE)
 
-all: build tag
+build: check-docker
+	docker build -t $(IMAGE) --rm .
+	docker tag -f $(IMAGE) $(IMAGE_PREFIX)$(CONTAINER):latest
 
-build:
-	@echo "\n\033[0;35mBuilding $(NAME) container from Dockerfile:\033[0m\n" \
-	      "Repository: [\033[0;33m$(REPO)\033[0m]\n" \
-	      "Name:       [\033[0;33m$(NAME)\033[0m]\n" \
-	      "Version:    [\033[0;33m$(VERSION)\033[0m]\n"
-	docker build -t $(REPO)/$(NAME):$(VERSION) .
+clean: check-docker check-registry
+	docker rmi $(IMAGE)
 
-tag:
-	docker tag -f $(REPO)/$(NAME):$(VERSION) $(REPO)/$(NAME):latest
-
-push:
-	docker push $(REPO)/$(NAME):$(VERSION)
-
-shell:
-	docker run --rm --name $(INSTANCE) -it $(REPO)/$(NAME):$(VERSION) /bin/sh
-
-run:
-	docker run --rm --name $(INSTANCE) $(PORTS) $(ENV) $(REPO)/$(NAME):$(VERSION)
+full-clean: check-docker check-registry
+	docker images -q $(IMAGE_PREFIX)$(CONTAINER) | xargs docker rmi -f
 
 start:
-	docker run -d --name $(INSTANCE) $(PORTS) $(ENV) $(REPO)/$(NAME):$(VERSION)
+	docker run -d --name $(CONTAINER) $(IMAGE)
 
 stop:
-	docker stop $$(INSTANCE)
+	docker stop $(CONTAINER)
 
-rm:
-	docker rm $(INSTANCE)
+restart: stop start
 
-release: build
-	make push -e version=$(VERSION)
+run: start
 
-clean:
-	docker rmi -f $$(docker images -q --filter 'dangling=true')
-	docker rmi -f $(REPO)/$(NAME):$(VERSION)
-	docker rmi -f $(REPO)/$(NAME):latest
+dev-release: push set-image
+
+push: check-registry
+	docker tag -f $(IMAGE) $(DEV_IMAGE)
+	docker push $(DEV_IMAGE)
+
+release:
+	docker push $(IMAGE)
+
+deploy: build dev-release restart
+
+test:

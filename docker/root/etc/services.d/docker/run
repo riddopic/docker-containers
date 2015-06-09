@@ -84,9 +84,8 @@ if [ "$PORT" ]; then
 	exec docker -d -H 0.0.0.0:$PORT $DOCKER_DAEMON_ARGS
 else
 	if [ "$LOG" == "file" ]; then
-		docker -d $DOCKER_DAEMON_ARGS &>/var/log/docker.log &
+		exec docker -d $DOCKER_DAEMON_ARGS &>/var/log/docker.log
 	else
-		docker -d $DOCKER_DAEMON_ARGS &
+		exec docker -d $DOCKER_DAEMON_ARGS
 	fi
-	exec bash
 fi

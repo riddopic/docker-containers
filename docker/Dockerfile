@@ -20,7 +20,7 @@
 FROM       riddopic/ubuntu-14.04
 MAINTAINER Stefano Harding <riddopic@gmail.com>
 
-ENV INITRD=no GOMAXPROCS=2 DEBIAN_FRONTEND=noninteractive
+ENV INITRD=no GOMAXPROCS=2 DEBIAN_FRONTEND=noninteractive PORT=4444
 ADD root /
 RUN apt-get-min update;\
     apt-get-install-min apt-transport-https ca-certificates curl lxc iptables ;\

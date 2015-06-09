@@ -23,6 +23,27 @@ client, in addition to having s6, Consul, CRON and syslog/rsyslogd.
 	* Fedora 21
 	* Ubuntu 14.04
 
+## Quick Start Guide
+
+Also know as 'runs with scissors' Assuming your machine meets the basic
+requirements, has docker-machine installed running boot2docker version >= 1.6.2
+and ChefDK;
+
+ 1. Clone the git repo and `bundle install` any required gems:
+
+      $ git clone https://github.com/riddopic/docker-containers
+      $ cd docker-containers
+      $ bundle install
+
+ 2. Make all target containers:
+
+      $ make all
+
+Will build all the containers in this repo. To specify a particular target
+replace all with the name of the target:
+
+     $ make centos-6
+
 ## Base Containers
 
 These containers form a base image layer that we build on to create the
@@ -41,7 +62,7 @@ Consul or all other requests to the original name servers (8.8.8.8, 8.8.4.4).
 
 The consul Web gui runs on the default port of 8500.
 
-	    * http://consul.acme.dev:8500
+	    * http://consul.mudbox.dev:8500
 
 #### Docker
 
@@ -54,28 +75,211 @@ provision containers locally.
 [Seagull][] provides a friendly Web UI to monitor docker and get a visual
 representation of your running infrastructure.
 
-		* http://seagull.acme.dev
+### Chef 12 Server
 
-## Quick Start Guide
+Based off the Ubuntu 'FatBoy' 14.04 image, this image runs a Chef 12 Server, and
+is specifically not configured with any redundancy nor is any of the data backed
+up. This is purposefully done to ensure that it is regularly recycled and that
+anything used to build the infrastructure is captured and automated.
 
-Also know as 'runs with scissors' Assuming your machine meets the basic
-requirements, has docker-machine installed running boot2docker version >= 1.6.2
-and ChefDK;
+#### Environment Variables
 
- 1) Clone the git repo and `bundle install` any required gems:
+ - `PUBLIC_URL` - should be configured to a full public URL of the
+   endpoint (e.g. `https://chef.mudbox.dev`)
+ - `OC_ID_ADMINISTRATORS` - if set, it should be a comma-separated list of
+   users that will be allowed to add oc_id applications (the Supermarket
+   for example).
 
-      $ git clone https://github.com/riddopic/docker-containers
-      $ cd docker-containers
-      $ bundle install
+#### Ports
 
- 2) Make all target containers:
+ - Ports 80 (HTTP) and  443 (HTTPS) are exposed.
 
-      $ make all
+#### Usage
 
-Will build all the containers in this repo. To specify a particular target
-replace all with the name of the target:
+To start the container `chef` with the hostname set to `chef.mudbox.dev`, using
+the riddopic/chef-server base container:
 
-     $ make centos-6
+	$ docker run -d --name chef -h chef.mudbox.dev \
+		-e 'PUBLIC_URL=https://chef.mudbox.dev OC_ID_ADMINISTRATORS=jenkins' \
+			riddopic/chef-server
+
+#### Prerequisites and first start
+
+The `kernel.shmmax` and `kernel.shmall` sysctl values should be set to
+a high value on the docker-machine host.
+
+To set the `kernel.shmmax` and `kernel.shmall` sysctl values run the following
+on your docker hosts:
+
+	$ docker-machine ssh dev -- sudo sysctl -w kernel.shmmax=17179869184
+	$ docker-machine ssh dev -- sudo sysctl -w kernel.shmall=4194304
+
+To make the change permanent add the values to `/etc/sysctl.con`:
+
+	$ docker-machine ssh dev -- sudo sh -c 'kernel.shmmax=17179869184" \
+		>> sysctl.conf'
+	$ docker-machine ssh dev -- sudo sh \
+		-c 'kernel.shmall=4194304" >> sysctl.conf'
+
+First start will automatically run `chef-server-ctl reconfigure`. Subsequent
+starts will not run `reconfigure`, unless file `/var/opt/opscode/bootstrapped`
+has been deleted. You can run `reconfigure` (e.g. after editing
+`etc/chef-server.rb`) using `docker-enter`.
+
+#### Maintenance commands
+
+Use `docker exec` to run commands on your Chef server:
+
+    $ docker exec $CONTAINER_ID chef-server-ctl status
+    $ docker exec $CONTAINER_ID chef-server-ctl user-create …
+    $ docker exec $CONTAINER_ID chef-server-ctl org-create …
+    $ docker exec $CONTAINER_ID chef-server-ctl …
+
+#### Building
+
+    $ cd docker-containers/chef-server && make build
+
+      Building chef-server container from Dockerfile:
+        Repository:   [acme]
+	      Name:       [chef-server]
+	      Version:    [12.3]
+
+      docker build -t riddopic/chef-server:12.3 .
+    	Sending build context to Docker daemon 32.26 kB
+    	Sending build context to Docker daemon
+    	Step 0 : FROM riddopic/ubuntu-14.04
+    	 ---> fdf1de186398
+    	Step 1 : MAINTAINER Stefano Harding <riddopic@gmail.com>
+    	 ---> Using cache
+    	 ---> 57c555b6c956
+    	Step 2 : EXPOSE 80 443
+    	 ---> Running in a37640aa6058
+    	 ---> d7de20a31256
+    	Removing intermediate container a37640aa6058
+    	Step 3 : ENV ENV GOMAXPROCS=2 DEBIAN_FRONTEND=noninteractive KNIFE_HOME=/etc/chef
+    	 ---> Running in b1052cb051e5
+    	 ---> c93827c0de6c
+    	Removing intermediate container b1052cb051e5
+    	Step 4 : RUN apt-get-min update;
+    	             apt-get-install-min logrotate hardlink chef-server-core;
+    	             rm -rf /etc/opscode;
+    	             ln -sfv /var/opt/opscode/log /var/log/opscode;
+    	             ln -sfv /var/opt/opscode/etc /etc/opscode;
+    	             ln -sfv /opt/opscode/sv/logrotate /opt/opscode/service;
+    	             ln -sfv /opt/opscode/embedded/bin/sv /opt/opscode/init/logrotate;
+    	             chef-apply -e 'chef_gem "knife-opc"';
+    	             apt-get-min clean;
+    	             rm -rf /tmp/* /var/tmp/* /var/lib/apt/lists/* /var/cache/apt/archives/*
+    	 ---> Running in c6b15e1e0192
+    	Get:1 http://mirrors.dev trusty InRelease [1730 B]
+    	Get:2 http://mirrors.dev trusty-updates InRelease [1762 B]
+    	Get:3 http://mirrors.dev trusty-security InRelease [1766 B]
+    	Get:4 http://mirrors.dev chef InRelease [1722 B]
+    	Get:5 http://mirrors.dev trusty/main amd64 Packages [9620 kB]
+    	Get:6 http://mirrors.dev trusty-updates/main amd64 Packages [1062 kB]
+    	Get:7 http://mirrors.dev trusty-security/main amd64 Packages [490 kB]
+    	Get:8 http://mirrors.dev chef/main amd64 Packages [1586 B]
+    	Fetched 11.2 MB in 1s (5943 kB/s)
+    	Reading package lists...
+    	Reading package lists...
+    	Building dependency tree...
+    	Reading state information...
+    	logrotate is already the newest version.
+    	The following NEW packages will be installed:
+    	  chef-server-core hardlink
+    	0 upgraded, 2 newly installed, 0 to remove and 0 not upgraded.
+    	Need to get 460 MB of archives.
+    	After this operation, 1211 MB of additional disk space will be used.
+    	Get:1 http://mirrors.dev/ubuntu/public/ trusty/main hardlink amd64 0.2.0 [12.4 kB]
+    	Get:2 http://mirrors.dev/ubuntu/public/ chef/main chef-server-core amd64 12.0.8-1 [460 MB]
+    	Fetched 460 MB in 9s (46.4 MB/s)
+    	Selecting previously unselected package hardlink.
+    	(Reading database ... 29926 files and directories currently installed.)
+    	Preparing to unpack .../hardlink_0.2.0_amd64.deb ...
+    	Unpacking hardlink (0.2.0) ...
+    	Selecting previously unselected package chef-server-core.
+    	Preparing to unpack .../chef-server-core_12.0.8-1_amd64.deb ...
+    	Unpacking chef-server-core (12.0.8-1) ...
+    	Setting up hardlink (0.2.0) ...
+    	Setting up chef-server-core (12.0.8-1) ...
+    	Thank you for installing Chef Server!
+    	'/var/log/opscode' -> '/var/opt/opscode/log'
+    	'/etc/opscode' -> '/var/opt/opscode/etc'
+    	'/opt/opscode/service/logrotate' -> '/opt/opscode/sv/logrotate'
+    	'/opt/opscode/init/logrotate' -> '/opt/opscode/embedded/bin/sv'
+    	[2015-06-01T16:50:27+00:00] INFO: Run List is []
+    	[2015-06-01T16:50:27+00:00] INFO: Run List expands to []
+    	[2015-06-01T16:50:27+00:00] WARN: chef_gem[knife-opc] chef_gem compile_time installation is deprecated
+    	[2015-06-01T16:50:27+00:00] WARN: chef_gem[knife-opc] Please set `compile_time false` on the resource to use the new behavior.
+    	[2015-06-01T16:50:27+00:00] WARN: chef_gem[knife-opc] or set `compile_time true` on the resource if compile_time behavior is required.
+    	[2015-06-01T16:50:27+00:00] INFO: Processing chef_gem[knife-opc] action install ((chef-apply cookbook)::(chef-apply recipe) line 1)
+    	[2015-06-01T16:50:32+00:00] INFO: chef_gem[knife-opc] installed knife-opc at 0.3.1
+    	[2015-06-01T16:50:32+00:00] INFO: Processing chef_gem[knife-opc] action install ((chef-apply cookbook)::(chef-apply recipe) line 1)
+    	 ---> ad7a4332229d
+    	Removing intermediate container c6b15e1e0192
+    	Step 5 : ADD root /
+    	 ---> 5b5683a453b0
+    	Removing intermediate container aabfcf17679b
+    	Successfully built 5b5683a453b0
+
+### ELKStack
+
+ElasticSearch, LogStash and Kibana, or ELK stack as it's affectionately called
+by its brethren provides us with the ability to centralize our logs using the
+new docker logging driver. This should normally be done by linking containers
+but we are going to use the network for simulated effect of more real world
+examples.
+
+#### ElasticSearch
+
+	  $ docker run -d --name elasticsearch -h elasticsearch.mudbox.dev \
+		  riddopic/elasticsearch
+
+#### LogStash
+
+    $ docker run -d --name logstash -h logstash.mudbox.dev riddopic/logstash \
+    	-f /conf/syslog.conf
+
+#### Kibana
+
+     $ docker run -d --name kibana -h logstash.mudbox.dev riddopic/kibana
+
+Once this container is running, Kibana configuration from the file es-
+kibana.json was imported into the ElasticSearch database. Now we can take a look
+at Kibana dashboard that we just setup. In your favorite browser, hopefully not
+IE 8, open [http://localhost:5601](http://localhost:5601).
+
+#### Building
+
+    $ cd docker-containers/elasticsearch && make build
+    $ cd docker-containers/logstash && make build
+    $ cd docker-containers/kibana && make build
+
+## Mini Docker cheat-sheet:
+
+Return last-run container id.
+
+	  $ docker ps -l -q
+
+Kill all running containers:
+
+    $ docker kill $(docker ps -q)
+
+Remove all stopped containers:
+
+    $ docker rm -f $(docker ps -a | grep Exited | awk '{print $1}')
+
+Remove all untagged images:
+
+    $ docker rmi -f $(docker images -q --filter "dangling=true")
+
+Stop and remove all containers (including running containers!)
+
+    $ docker rm -f $(docker ps -a -q)
+
+Clean all container images.
+
+    $ docker rmi -f $(docker images -aq)
 
 ## Requirements
 
@@ -105,11 +309,11 @@ You don’t need the full Xcode package to get the Xcode Command Line Tools.
 However, you may have previously installed the full Xcode package. To check if
 the full Xcode package is already installed:
 
-	$ xcode-select -p
+	  $ xcode-select -p
 
 If you see:
 
-	/Applications/Xcode.app/Contents/Developer
+	  /Applications/Xcode.app/Contents/Developer
 
 the full Xcode package is already installed.
 
@@ -119,7 +323,7 @@ launch the Xcode application and accept the Apple license terms.
 
 If you see a file location that contains spaces in the path:
 
-	/Applications/Apple Dev Tools/Xcode.app/Contents/Developer
+	  /Applications/Apple Dev Tools/Xcode.app/Contents/Developer
 
 you must delete Xcode. ChefDK and most command line tools will not work with
 spaces in the path. You can either install only the Xcode Command Line Tools
@@ -132,7 +336,7 @@ requires Xcode Command Line Tools. For example, you can enter gcc, git, or make.
 
 Try it. Enter:
 
-	$ gcc
+	  $ gcc
 
 You’ll see an alert box:
 
@@ -464,212 +668,6 @@ raiders. However recent changes in leadership at ICANN, bribes, corporate
 raiding, user backlash and some the occasion blogger postings have lead to
 the .dev domain fate being that of an unknown elephant waiting at the bus stop
 for exact change.
-
-### Chef 12 Server
-
-Based off the Ubuntu 'FatBoy' 14.04 image, this image runs a Chef 12 Server, and
-is specifically not configured with any redundancy nor is any of the data backed
-up. This is purposefully done to ensure that it is regularly recycled and that
-anything used to build the infrastructure is captured and automated.
-
-#### Environment Variables
-
- - `PUBLIC_URL` - should be configured to a full public URL of the
-   endpoint (e.g. `https://chef.acme.dev`)
- - `OC_ID_ADMINISTRATORS` - if set, it should be a comma-separated list of
-   users that will be allowed to add oc_id applications (the Supermarket
-   for example).
-
-#### Ports
-
- - Ports 80 (HTTP) and  443 (HTTPS) are exposed.
-
-#### Usage
-
-To start the container `chef` with the hostname set to `chef.acme.dev`, using
-the acme/chef-server base container:
-
-	$ docker run -d --name chef -h chef.acme.dev \
-		-e 'PUBLIC_URL=https://chef.acme.dev OC_ID_ADMINISTRATORS=jenkins' \
-			acme/chef-server
-
-#### Prerequisites and first start
-
-The `kernel.shmmax` and `kernel.shmall` sysctl values should be set to
-a high value on the docker-machine host.
-
-To set the `kernel.shmmax` and `kernel.shmall` sysctl values run the following
-on your docker hosts:
-
-	$ docker-machine ssh dev -- sudo sysctl -w kernel.shmmax=17179869184
-	$ docker-machine ssh dev -- sudo sysctl -w kernel.shmall=4194304
-
-To make the change permanent add the values to `/etc/sysctl.con`:
-
-	$ docker-machine ssh dev -- sudo sh -c 'kernel.shmmax=17179869184" \
-		>> sysctl.conf'
-	$ docker-machine ssh dev -- sudo sh \
-		-c 'kernel.shmall=4194304" >> sysctl.conf'
-
-First start will automatically run `chef-server-ctl reconfigure`. Subsequent
-starts will not run `reconfigure`, unless file `/var/opt/opscode/bootstrapped`
-has been deleted. You can run `reconfigure` (e.g. after editing
-`etc/chef-server.rb`) using `docker-enter`.
-
-#### Maintenance commands
-
-Use `docker exec` to run commands on your Chef server:
-
-    $ docker exec $CONTAINER_ID chef-server-ctl status
-    $ docker exec $CONTAINER_ID chef-server-ctl user-create …
-    $ docker exec $CONTAINER_ID chef-server-ctl org-create …
-    $ docker exec $CONTAINER_ID chef-server-ctl …
-
-#### Building
-
-    $ cd docker-containers/chef-server && make build
-
-      Building chef-server container from Dockerfile:
-        Repository: [riddopic]
-	      Name:       [chef-server]
-	      Version:    [12.3]
-
-      docker build -t riddopic/chef-server:12.3 .
-    	Sending build context to Docker daemon 32.26 kB
-    	Sending build context to Docker daemon
-    	Step 0 : FROM riddopic/ubuntu-14.04
-    	 ---> fdf1de186398
-    	Step 1 : MAINTAINER Stefano Harding <riddopic@gmail.com>
-    	 ---> Using cache
-    	 ---> 57c555b6c956
-    	Step 2 : EXPOSE 80 443
-    	 ---> Running in a37640aa6058
-    	 ---> d7de20a31256
-    	Removing intermediate container a37640aa6058
-    	Step 3 : ENV ENV GOMAXPROCS=2 DEBIAN_FRONTEND=noninteractive KNIFE_HOME=/etc/chef
-    	 ---> Running in b1052cb051e5
-    	 ---> c93827c0de6c
-    	Removing intermediate container b1052cb051e5
-    	Step 4 : RUN apt-get-min update;
-    	             apt-get-install-min logrotate hardlink chef-server-core;
-    	             rm -rf /etc/opscode;
-    	             ln -sfv /var/opt/opscode/log /var/log/opscode;
-    	             ln -sfv /var/opt/opscode/etc /etc/opscode;
-    	             ln -sfv /opt/opscode/sv/logrotate /opt/opscode/service;
-    	             ln -sfv /opt/opscode/embedded/bin/sv /opt/opscode/init/logrotate;
-    	             chef-apply -e 'chef_gem "knife-opc"';
-    	             apt-get-min clean;
-    	             rm -rf /tmp/* /var/tmp/* /var/lib/apt/lists/* /var/cache/apt/archives/*
-    	 ---> Running in c6b15e1e0192
-    	Get:1 http://mirrors.dev trusty InRelease [1730 B]
-    	Get:2 http://mirrors.dev trusty-updates InRelease [1762 B]
-    	Get:3 http://mirrors.dev trusty-security InRelease [1766 B]
-    	Get:4 http://mirrors.dev chef InRelease [1722 B]
-    	Get:5 http://mirrors.dev trusty/main amd64 Packages [9620 kB]
-    	Get:6 http://mirrors.dev trusty-updates/main amd64 Packages [1062 kB]
-    	Get:7 http://mirrors.dev trusty-security/main amd64 Packages [490 kB]
-    	Get:8 http://mirrors.dev chef/main amd64 Packages [1586 B]
-    	Fetched 11.2 MB in 1s (5943 kB/s)
-    	Reading package lists...
-    	Reading package lists...
-    	Building dependency tree...
-    	Reading state information...
-    	logrotate is already the newest version.
-    	The following NEW packages will be installed:
-    	  chef-server-core hardlink
-    	0 upgraded, 2 newly installed, 0 to remove and 0 not upgraded.
-    	Need to get 460 MB of archives.
-    	After this operation, 1211 MB of additional disk space will be used.
-    	Get:1 http://mirrors.dev/ubuntu/public/ trusty/main hardlink amd64 0.2.0 [12.4 kB]
-    	Get:2 http://mirrors.dev/ubuntu/public/ chef/main chef-server-core amd64 12.0.8-1 [460 MB]
-    	Fetched 460 MB in 9s (46.4 MB/s)
-    	Selecting previously unselected package hardlink.
-    	(Reading database ... 29926 files and directories currently installed.)
-    	Preparing to unpack .../hardlink_0.2.0_amd64.deb ...
-    	Unpacking hardlink (0.2.0) ...
-    	Selecting previously unselected package chef-server-core.
-    	Preparing to unpack .../chef-server-core_12.0.8-1_amd64.deb ...
-    	Unpacking chef-server-core (12.0.8-1) ...
-    	Setting up hardlink (0.2.0) ...
-    	Setting up chef-server-core (12.0.8-1) ...
-    	Thank you for installing Chef Server!
-    	'/var/log/opscode' -> '/var/opt/opscode/log'
-    	'/etc/opscode' -> '/var/opt/opscode/etc'
-    	'/opt/opscode/service/logrotate' -> '/opt/opscode/sv/logrotate'
-    	'/opt/opscode/init/logrotate' -> '/opt/opscode/embedded/bin/sv'
-    	[2015-06-01T16:50:27+00:00] INFO: Run List is []
-    	[2015-06-01T16:50:27+00:00] INFO: Run List expands to []
-    	[2015-06-01T16:50:27+00:00] WARN: chef_gem[knife-opc] chef_gem compile_time installation is deprecated
-    	[2015-06-01T16:50:27+00:00] WARN: chef_gem[knife-opc] Please set `compile_time false` on the resource to use the new behavior.
-    	[2015-06-01T16:50:27+00:00] WARN: chef_gem[knife-opc] or set `compile_time true` on the resource if compile_time behavior is required.
-    	[2015-06-01T16:50:27+00:00] INFO: Processing chef_gem[knife-opc] action install ((chef-apply cookbook)::(chef-apply recipe) line 1)
-    	[2015-06-01T16:50:32+00:00] INFO: chef_gem[knife-opc] installed knife-opc at 0.3.1
-    	[2015-06-01T16:50:32+00:00] INFO: Processing chef_gem[knife-opc] action install ((chef-apply cookbook)::(chef-apply recipe) line 1)
-    	 ---> ad7a4332229d
-    	Removing intermediate container c6b15e1e0192
-    	Step 5 : ADD root /
-    	 ---> 5b5683a453b0
-    	Removing intermediate container aabfcf17679b
-    	Successfully built 5b5683a453b0
-
-### ELKStack
-
-ElasticSearch, LogStash and Kibana, or ELK stack as it's affectionately called
-by its brethren provides us with the ability to centralize our logs using the
-new docker logging driver. This should normally be done by linking containers
-but we are going to use the network for simulated effect of more real world
-examples.
-
-#### ElasticSearch
-
-	$ docker run -d --name elasticsearch -h elasticsearch.acme.dev \
-		riddopic/elasticsearch
-
-#### LogStash
-
-    $ docker run -d --name logstash -h logstash.acme.dev riddopic/logstash \
-    	-f /conf/syslog.conf
-
-#### Kibana
-
-     $ docker run -d --name kibana -h logstash.acme.dev riddopic/kibana
-
-Once this container is running, Kibana configuration from the file es-
-kibana.json was imported into the ElasticSearch database. Now we can take a look
-at Kibana dashboard that we just setup. In your favorite browser, hopefully not
-IE 8, open [http://localhost:5601](http://localhost:5601).
-
-#### Building
-
-    $ cd docker-containers/elasticsearch && make build
-    $ cd docker-containers/logstash && make build
-    $ cd docker-containers/kibana && make build
-
-## Mini Docker cheat-sheet:
-
-Return last-run container id.
-
-	$ docker ps -l -q
-
-Kill all running containers:
-
-    $ docker kill $(docker ps -q)
-
-Remove all stopped containers:
-
-    $ docker rm -f $(docker ps -a | grep Exited | awk '{print $1}')
-
-Remove all untagged images:
-
-    $ docker rmi -f $(docker images -q --filter "dangling=true")
-
-Stop and remove all containers (including running containers!)
-
-    $ docker rm -f $(docker ps -a -q)
-
-Clean all container images.
-
-    $ docker rmi -f $(docker images -aq)
 
 ## License and Authors
 
