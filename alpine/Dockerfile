@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 
-FROM       alpine:3.2
+FROM       alpine:3.11.12
 MAINTAINER Stefano Harding <riddopic@gmail.com>
 
 ENV CONSUL_VERSION=0.5.2 GOMAXPROCS=2 GOPATH=/go
